@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>جاري التحويل...</title>
     <style>
         body {
@@ -18,7 +21,7 @@
         .msg { font-size: 1.2rem; color: #334155; font-weight: 500; }
     </style>
     <script>
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRec4FiB1LDcWTuEe2XEJE5CS3scf8_tXe0y9z2QFyGvd5Ejvcd4OAb-jrb8WRfxzS6o412KjBgLPfj/pub?gid=1997163139&single=true&output=csv';
+        const BASE_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRec4FiB1LDcWTuEe2XEJE5CS3scf8_tXe0y9z2QFyGvd5Ejvcd4OAb-jrb8WRfxzS6o412KjBgLPfj/pub?gid=1997163139&single=true&output=csv';
 
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -29,7 +32,10 @@
                 return;
             }
 
-            fetch(CSV_URL)
+            // إضافة ختم زمني لمنع المتصفح من تخزين النتيجة القديمة (Bypass Cache)
+            const freshUrl = BASE_CSV_URL + '&timestamp=' + new Date().getTime();
+
+            fetch(freshUrl, { cache: 'no-store' })
                 .then(res => {
                     if (!res.ok) throw new Error('فشل جلب الملف');
                     return res.text();
@@ -39,7 +45,6 @@
                     let targetUrl = null;
 
                     for (let line of lines) {
-                        // تقسيم الأعمدة مع تنظيف الفواصل وعلامات التنصيص
                         const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').trim());
                         if (cols[0] === cardId.trim()) {
                             targetUrl = cols[1];
