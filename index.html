@@ -15,11 +15,10 @@
             margin: 0;
             text-align: center;
         }
-        .msg { font-size: 1.2rem; color: #334155; }
+        .msg { font-size: 1.2rem; color: #334155; font-weight: 500; }
     </style>
     <script>
-        const SHEET_ID = '17RbMt1KHlVIn7_k7vqIXDwV5FTPbgOvP9ynbOFrmS1U';
-        const GID = '1997163139';
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRec4FiB1LDcWTuEe2XEJE5CS3scf8_tXe0y9z2QFyGvd5Ejvcd4OAb-jrb8WRfxzS6o412KjBgLPfj/pub?gid=1997163139&single=true&output=csv';
 
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -30,18 +29,17 @@
                 return;
             }
 
-            const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
-
-            fetch(csvUrl)
+            fetch(CSV_URL)
                 .then(res => {
-                    if (!res.ok) throw new Error('Network error');
+                    if (!res.ok) throw new Error('فشل جلب الملف');
                     return res.text();
                 })
                 .then(text => {
-                    const lines = text.split(/\r\n|\n/);
+                    const lines = text.split(/\r?\n/);
                     let targetUrl = null;
 
                     for (let line of lines) {
+                        // تقسيم الأعمدة مع تنظيف الفواصل وعلامات التنصيص
                         const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').trim());
                         if (cols[0] === cardId.trim()) {
                             targetUrl = cols[1];
@@ -52,11 +50,11 @@
                     if (targetUrl && (targetUrl.startsWith('http://') || targetUrl.startsWith('https://'))) {
                         window.location.replace(targetUrl);
                     } else {
-                        document.body.innerHTML = '<div class="msg">هذا الكارت غير مفعّل بعد أو الرابط غير صالح</div>';
+                        document.body.innerHTML = '<div class="msg">هذا الكارت غير مفعّل بعد أو الرابط غير صحيح</div>';
                     }
                 })
-                .catch(err => {
-                    document.body.innerHTML = '<div class="msg">حدث خطأ في جلب البيانات</div>';
+                .catch(() => {
+                    document.body.innerHTML = '<div class="msg">حدث خطأ أثناء تحميل البيانات</div>';
                 });
         });
     </script>
