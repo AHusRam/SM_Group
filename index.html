@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecting...</title>
+    <script>
+        // 1. ضع هنا الـ ID الخاص بجوجل شيت بتاعك
+        const SHEET_ID = 'ضع_هنا_معرف_الشيت_الخاص_بك';
+        
+        // قراءة الـ id من الرابط (مثلا ?id=101)
+        const urlParams = new URLSearchParams(window.location.search);
+        const cardId = urlParams.get('id');
+
+        if (cardId) {
+            const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
+            fetch(csvUrl)
+                .then(res => res.text())
+                .then(data => {
+                    // تقسيم البيانات والبحث عن الرابط
+                    const rows = data.split('\n').map(row => row.split(',').map(cell => cell.replace(/"/g, '').trim()));
+                    const target = rows.find(r => r[0] === cardId);
+                    if (target && target[1] && target[1].startsWith('http')) {
+                        window.location.href = target[1];
+                    } else {
+                        document.body.innerHTML = '<h3>هذا الكارت غير مفعّل بعد</h3>';
+                    }
+                })
+                .catch(() => {
+                    document.body.innerHTML = '<h3>حدث خطأ، يرجى المحاولة لاحقاً</h3>';
+                });
+        } else {
+            document.body.innerHTML = '<h3>رابط غير صالح</h3>';
+        }
+    </script>
+</head>
+<body style="font-family: sans-serif; text-align: center; margin-top: 20%;">
+    <p>جاري تحويلك...</p>
+</body>
+</html>
